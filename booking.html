@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Бронирование | ComfortStay</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1>ComfortStay</h1>
+    <p>Бронирование номера</p>
+  </header>
+
+  <main class="container">
+    <div class="booking-form">
+      <a href="index.html" class="back-link">← Вернуться в каталог</a>
+      <h2 id="room-title">Загрузка...</h2>
+      
+      <form id="booking-form">
+        <input type="hidden" id="room-category">
+        <input type="hidden" id="room-name-hidden">
+        
+        <div class="form-group">
+          <label>Имя *</label>
+          <input type="text" id="name" name="name" required pattern="^[а-яёА-ЯЁё\s\.\-]+$" placeholder="Иван">
+        </div>
+        
+        <div class="form-group">
+          <label>Фамилия *</label>
+          <input type="text" id="surname" name="surname" required pattern="^[а-яёА-ЯЁё\s\.\-]+$" placeholder="Петров">
+        </div>
+        
+        <div class="form-group">
+          <label>Телефон *</label>
+          <input type="tel" id="phone" name="phone" required pattern="^\+7\(\d{3}\)\d{3}-\d{2}-\d{2}$" placeholder="+7(999)123-45-67">
+        </div>
+        
+        <div class="form-group">
+          <label>E-mail *</label>
+          <input type="email" id="email" name="email" required placeholder="mail@example.com">
+        </div>
+        
+        <div class="form-group">
+          <label>Категория номера</label>
+          <input type="text" id="category-display" readonly>
+        </div>
+        
+        <div class="form-group">
+          <label>Дата заезда *</label>
+          <input type="date" id="checkin" name="checkin" required>
+        </div>
+        
+        <div class="form-group">
+          <label>Дата выезда *</label>
+          <input type="date" id="checkout" name="checkout" required>
+        </div>
+        
+        <button type="submit" class="btn" style="width:100%">Отправить заявку</button>
+      </form>
+      
+      <div id="booking-success" class="success">✅ Заявка успешно отправлена! Мы скоро свяжемся с вами.</div>
+    </div>
+  </main>
+
+  <footer>
+    <p>📍 г. Москва, ул. Примерная, д. 10</p>
+    <p>🕒 Пн-Вс 08:00–22:00 | 📞 +7 (495) 123-45-67</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script>
+    const ROOMS = {
+      1:{name:"Стандартный номер",category:"Стандарт"},
+      2:{name:"Эконом номер",category:"Эконом"},
+      3:{name:"Люкс с видом",category:"Люкс"},
+      4:{name:"Стандарт Плюс",category:"Стандарт"}
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Получаем номер из URL
+      const params = new URLSearchParams(window.location.search);
+      const roomId = params.get('room');
+      const room = ROOMS[roomId];
+      
+      if (!room) { window.location.href = 'index.html'; return; }
+      
+      // Заполняем данные номера
+      document.getElementById('room-title').textContent = 'Бронирование: ' + room.name;
+      document.getElementById('room-category').value = room.category;
+      document.getElementById('room-name-hidden').value = room.name;
+      document.getElementById('category-display').value = room.category;
+      
+      // Настройка дат
+      App.setupMinDates('checkin', 'checkout');
+
+      // Обработка формы
+      document.getElementById('booking-form').addEventListener('submit', e => {
+        e.preventDefault();
+        
+        const checkin = document.getElementById('checkin').value;
+        const checkout = document.getElementById('checkout').value;
+        
+        if (new Date(checkout) <= new Date(checkin)) {
+          alert('Дата выезда должна быть строго позже даты заезда');
+          return;
+        }
+
+        // Создаём бронирование
+        App.addBooking({
+          name: document.getElementById('name').value.trim(),
+          surname: document.getElementById('surname').value.trim(),
+          phone: document.getElementById('phone').value.trim(),
+          email: document.getElementById('email').value.trim(),
+          category: document.getElementById('room-category').value,
+          roomName: document.getElementById('room-name-hidden').value,
+          checkin, checkout
+        });
+
+        // Показываем успех
+        document.getElementById('booking-success').style.display = 'block';
+        setTimeout(() => {
+          document.getElementById('booking-success').style.display = 'none';
+          document.getElementById('booking-form').reset();
+        }, 3000);
+      });
+    });
+  </script>
+</body>
+</html>

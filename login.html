@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вход | ComfortStay Админ</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="container" style="display:flex;align-items:center;justify-content:center;min-height:80vh">
+    <div class="login-box">
+      <h2>🔐 Админ-панель</h2>
+      <p class="mb-2">Введите данные для входа</p>
+      
+      <form id="login-form">
+        <div class="form-group">
+          <label>Логин</label>
+          <input type="text" id="login-user" required placeholder="admin">
+        </div>
+        <div id="err-user" class="error">Неверный логин</div>
+        
+        <div class="form-group">
+          <label>Пароль</label>
+          <input type="password" id="login-pass" required placeholder="••••••••">
+        </div>
+        <div id="err-pass" class="error">Неверный пароль</div>
+        
+        <button type="submit" class="btn" style="width:100%;margin-top:10px">Войти</button>
+      </form>
+      
+      <a href="index.html" class="back-link mt-2">← Вернуться на сайт</a>
+    </div>
+  </main>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Если уже авторизован — сразу в админку
+      if (App.isAdmin()) {
+        window.location.href = 'admin.html';
+        return;
+      }
+
+      document.getElementById('login-form').addEventListener('submit', e => {
+        e.preventDefault();
+        
+        const user = document.getElementById('login-user').value.trim();
+        const pass = document.getElementById('login-pass').value.trim();
+        
+        // Скрыть ошибки
+        document.getElementById('err-user').classList.remove('show');
+        document.getElementById('err-pass').classList.remove('show');
+        
+        // Проверка
+        if (user !== 'admin') {
+          document.getElementById('err-user').classList.add('show');
+          return;
+        }
+        if (pass !== 'admin123') {
+          document.getElementById('err-pass').classList.add('show');
+          return;
+        }
+        
+        // Успешный вход
+        App.login(user, pass);
+        window.location.href = 'admin.html';
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ComfortStay | Главная</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1>ComfortStay</h1>
+    <p>Уют начинается с правильного выбора</p>
+  </header>
+
+  <main class="container">
+    <div class="filters">
+      <label>Категория номера:
+        <select id="filter-category">
+          <option value="">Все категории</option>
+          <option value="Эконом">Эконом</option>
+          <option value="Стандарт">Стандарт</option>
+          <option value="Люкс">Люкс</option>
+        </select>
+      </label>
+      <button id="filter-apply" class="btn">Применить</button>
+      <button id="filter-reset" class="btn btn-ref">Сбросить</button>
+    </div>
+    <div class="rooms" id="rooms-list">
+      <!-- Номера генерируются через JS -->
+    </div>
+  </main>
+
+  <footer>
+    <p>📍 г. Москва, ул. Примерная, д. 10</p>
+    <p>🕒 Режим работы: Пн-Вс 08:00–22:00</p>
+    <p>📞 +7 (495) 123-45-67 | ✉️ info@comfortstay.ru</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script>
+    // Данные номеров
+    const ROOMS = [
+      {id:1,name:"Стандартный номер",category:"Стандарт",price:3500,img:"https://via.placeholder.com/400x250/3498db/fff?text=Стандарт"},
+      {id:2,name:"Эконом номер",category:"Эконом",price:2000,img:"https://via.placeholder.com/400x250/2ecc71/fff?text=Эконом"},
+      {id:3,name:"Люкс с видом",category:"Люкс",price:7500,img:"https://via.placeholder.com/400x250/e74c3c/fff?text=Люкс"},
+      {id:4,name:"Стандарт Плюс",category:"Стандарт",price:4200,img:"https://via.placeholder.com/400x250/9b59b6/fff?text=Стандарт+Плюс"}
+    ];
+
+    function renderRooms(list) {
+      document.getElementById('rooms-list').innerHTML = list.map(r => `
+        <div class="room">
+          <img src="${r.img}" alt="${r.name}" loading="lazy">
+          <div class="room-body">
+            <h3>${r.name}</h3>
+            <p>Категория: ${r.category}</p>
+            <div class="price">${r.price} ₽ / ночь</div>
+            <a href="booking.html?room=${r.id}" class="btn">Забронировать</a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderRooms(ROOMS);
+      
+      document.getElementById('filter-apply').addEventListener('click', () => {
+        const cat = document.getElementById('filter-category').value;
+        renderRooms(cat ? ROOMS.filter(r => r.category === cat) : ROOMS);
+      });
+      
+      document.getElementById('filter-reset').addEventListener('click', () => {
+        document.getElementById('filter-category').value = '';
+        renderRooms(ROOMS);
+      });
+    });
+  </script>
+</body>
+</html>
