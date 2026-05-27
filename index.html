@@ -5,15 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ComfortStay | Главная</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    .footer-contacts { max-width: 800px; margin: 0 auto; line-height: 1.8; }
+    .room-meta { color: var(--text-light); font-size: 14px; margin: 4px 0; }
+    .room-desc { font-size: 14px; margin: 6px 0; min-height: 36px; }
+    .empty-state { text-align: center; padding: 30px; color: var(--text-light); grid-column: 1 / -1; }
+    /* Плавная загрузка изображений */
+    .room img { transition: opacity 0.3s; background: #eee; min-height: 180px; }
+  </style>
 </head>
 <body>
+  <!-- 🔝 Шапка -->
   <header>
     <h1>ComfortStay</h1>
     <p>Уют начинается с правильного выбора</p>
   </header>
 
   <main class="container">
-    <div class="filters">
+    <!-- 🔍 Фильтры -->
+    <section class="filters">
       <label>Категория номера:
         <select id="filter-category">
           <option value="">Все категории</option>
@@ -22,55 +32,88 @@
           <option value="Люкс">Люкс</option>
         </select>
       </label>
-      <button id="filter-apply" class="btn">Применить</button>
-      <button id="filter-reset" class="btn btn-ref">Сбросить</button>
-    </div>
-    <div class="rooms" id="rooms-list">
-      <!-- Номера генерируются через JS -->
-    </div>
+      <button id="btn-apply" class="btn">Применить</button>
+      <button id="btn-reset" class="btn btn-ref">Сбросить фильтр</button>
+    </section>
+
+    <!-- 🏨 Список номеров -->
+    <section class="rooms" id="rooms-list"></section>
   </main>
 
+  <!-- 📞 Подвал с контактами -->
   <footer>
-    <p>📍 г. Москва, ул. Примерная, д. 10</p>
-    <p>🕒 Режим работы: Пн-Вс 08:00–22:00</p>
-    <p>📞 +7 (495) 123-45-67 | ✉️ info@comfortstay.ru</p>
+    <div class="footer-contacts">
+      <p>📍 г. Москва, ул. Примерная, д. 10</p>
+      <p>🕒 Режим работы: Пн-Вс 08:00–22:00</p>
+      <p>📞 +7 (495) 123-45-67</p>
+      <p>✉️ info@comfortstay.ru</p>
+    </div>
   </footer>
 
   <script src="js/app.js"></script>
   <script>
-    // Данные номеров
-    const ROOMS = [
-      {id:1,name:"Стандартный номер",category:"Стандарт",price:3500,img:"https://via.placeholder.com/400x250/3498db/fff?text=Стандарт"},
-      {id:2,name:"Эконом номер",category:"Эконом",price:2000,img:"https://via.placeholder.com/400x250/2ecc71/fff?text=Эконом"},
-      {id:3,name:"Люкс с видом",category:"Люкс",price:7500,img:"https://via.placeholder.com/400x250/e74c3c/fff?text=Люкс"},
-      {id:4,name:"Стандарт Плюс",category:"Стандарт",price:4200,img:"https://via.placeholder.com/400x250/9b59b6/fff?text=Стандарт+Плюс"}
+    // 📦 База номеров (8 шт. для случайной выборки 6)
+    const ROOMS_DB = [
+      { id: 1, name: "Уютный Эконом", category: "Эконом", price: 2000, img: "images/room1.jpg", features: "Односпальная кровать, Wi-Fi, ТВ, общая ванная" },
+      { id: 2, name: "Стандарт Плюс", category: "Стандарт", price: 3500, img: "images/room2.jpg", features: "Двуспальная кровать, Wi-Fi, мини-бар, собственная ванная" },
+      { id: 3, name: "Люкс с видом", category: "Люкс", price: 7500, img: "images/room3.jpg", features: "King-size кровать, балкон, джакузи, завтрак включён" },
+      { id: 4, name: "Семейный Комфорт", category: "Эконом", price: 2800, img: "images/room4.jpg", features: "2 комнаты, детская кроватка, кухня, Wi-Fi" },
+      { id: 5, name: "Бизнес Стандарт", category: "Стандарт", price: 4200, img: "images/room5.jpg", features: "Рабочая зона, скоростной Wi-Fi, шумоизоляция" },
+      { id: 6, name: "Эконом Лайт", category: "Эконом", price: 1800, img: "images/room6.jpg", features: "Односпальная кровать, вентилятор, общая кухня" },
+      { id: 7, name: "Президентский Люкс", category: "Люкс", price: 12000, img: "images/room7.jpg", features: "Гостиная, спальня, панорамные окна, консьерж" },
+      { id: 8, name: "Стандарт Уют", category: "Стандарт", price: 3800, img: "images/room8.jpg", features: "Двуспальная кровать, сейф, халаты, тапочки" }
     ];
 
-    function renderRooms(list) {
-      document.getElementById('rooms-list').innerHTML = list.map(r => `
-        <div class="room">
-          <img src="${r.img}" alt="${r.name}" loading="lazy">
-          <div class="room-body">
-            <h3>${r.name}</h3>
-            <p>Категория: ${r.category}</p>
-            <div class="price">${r.price} ₽ / ночь</div>
-            <a href="booking.html?room=${r.id}" class="btn">Забронировать</a>
-          </div>
-        </div>
-      `).join('');
+    // 🎲 Получение 6 случайных номеров
+    function getRandomSix() {
+      const shuffled = [...ROOMS_DB].sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, 6);
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      renderRooms(ROOMS);
+    // 🖼️ Рендер карточек
+    function renderRooms(rooms) {
+      const container = document.getElementById('rooms-list');
+      container.innerHTML = '';
       
-      document.getElementById('filter-apply').addEventListener('click', () => {
-        const cat = document.getElementById('filter-category').value;
-        renderRooms(cat ? ROOMS.filter(r => r.category === cat) : ROOMS);
+      if (rooms.length === 0) {
+        container.innerHTML = '<p class="empty-state">Номера данной категории временно отсутствуют</p>';
+        return;
+      }
+
+      rooms.forEach(r => {
+        container.insertAdjacentHTML('beforeend', `
+          <div class="room">
+            <!-- onerror заменяет битую картинку на заглушку, чтобы не было "битых" иконок -->
+            <img src="${r.img}" alt="${r.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x250/cccccc/666666?text=Нет+фото'">
+            <div class="room-body">
+              <h3>${r.name}</h3>
+              <p class="room-meta">Категория: <strong>${r.category}</strong></p>
+              <p class="room-desc">${r.features}</p>
+              <div class="price">${r.price} ₽ / ночь</div>
+              <a href="booking.html?room=${r.id}" class="btn">Забронировать</a>
+            </div>
+          </div>
+        `);
       });
-      
-      document.getElementById('filter-reset').addEventListener('click', () => {
+    }
+
+    // 🚀 Инициализация при загрузке
+    document.addEventListener('DOMContentLoaded', () => {
+      let currentRooms = getRandomSix();
+      renderRooms(currentRooms);
+
+      // 🔘 Применить фильтр
+      document.getElementById('btn-apply').addEventListener('click', () => {
+        const cat = document.getElementById('filter-category').value;
+        currentRooms = cat ? ROOMS_DB.filter(r => r.category === cat) : getRandomSix();
+        renderRooms(currentRooms);
+      });
+
+      // 🔘 Сбросить фильтр
+      document.getElementById('btn-reset').addEventListener('click', () => {
         document.getElementById('filter-category').value = '';
-        renderRooms(ROOMS);
+        currentRooms = getRandomSix();
+        renderRooms(currentRooms);
       });
     });
   </script>
