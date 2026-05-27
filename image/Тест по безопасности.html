@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Тест: Техника безопасности на рабочем месте</title>
+</head>
+<style>
+        /* Базовые настройки страницы */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Главный контейнер теста */
+        .quiz-container {
+            max-width: 650px;
+            margin: 20px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Заголовок */
+        h1 {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-top: 0;
+            border-bottom: 2px solid #eceff1;
+            padding-bottom: 15px;
+        }
+
+        /* Блок каждого вопроса */
+        .question-block {
+            margin-bottom: 25px;
+        }
+
+        .question-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #2c3e50;
+        }
+
+        /* Стилизация вариантов ответа */
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        /* Эффект при наведении на вариант ответа */
+        .option-label:hover {
+            background: #e9ecef;
+            border-color: #ced4da;
+        }
+
+        /* Небольшой отступ от кружка до текста */
+        .option-label input {
+            margin-right: 12px;
+            cursor: pointer;
+        }
+
+        /* Кнопка проверки */
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: #0056b3;
+        }
+
+        /* Блок вывода результата */
+        .result-box {
+            margin-top: 25px;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            border-radius: 6px;
+            display: none; /* Скрыт по умолчанию */
+        }
+
+        /* Классы для окрашивания результата через JS */
+        .result-success {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+<body>
+
+    <h1>Тест по технике безопасности и охране труда</h1>
+    <hr>
+
+    <form id="safetyQuiz">
+        <p><b>1. В какой момент должен проводиться первичный инструктаж на рабочем месте?</b></p>
+        <p>
+            <input type="radio" name="q1" value="a" id="q1a"> <label for="q1a">В течение первого месяца работы</label><br>
+            <input type="radio" name="q1" value="b" id="q1b"> <label for="q1b">До начала самостоятельной работы сотрудника</label><br>
+            <input type="radio" name="q1" value="c" id="q1c"> <label for="q1c">Только после прохождения испытательного срока</label><br>
+            <input type="radio" name="q1" value="d" id="q1d"> <label for="q1d">Сразу после первого происшествия на производстве</label>
+        </p>
+
+        <p><b>2. Что необходимо сделать в первую очередь при обнаружении неисправности оборудования (искрение, запах гари)?</b></p>
+        <p>
+            <input type="radio" name="q2" value="a" id="q2a"> <label for="q2a">Попытаться починить его самостоятельно</label><br>
+            <input type="radio" name="q2" value="b" id="q2b"> <label for="q2b">Обесточить оборудование и доложить руководителю</label><br>
+            <input type="radio" name="q2" value="c" id="q2c"> <label for="q2c">Закончить текущую смену и записать в журнал</label><br>
+            <input type="radio" name="q2" value="d" id="q2d"> <label for="q2d">Открыть окно для проветривания помещения</label>
+        </p>
+
+        <p><b>3. Как часто в общем случае должен проводиться повторный инструктаж по охране труда?</b></p>
+        <p>
+            <input type="radio" name="q3" value="a" id="q3a"> <label for="q3a">Каждые две недели</label><br>
+            <input type="radio" name="q3" value="b" id="q3b"> <label for="q3b">Раз в год</label><br>
+            <input type="radio" name="q3" value="c" id="q3c"> <label for="q3c">Не реже одного раза в 6 месяцев</label><br>
+            <input type="radio" name="q3" value="d" id="q3d"> <label for="q3d">Только в случае аварии или ЧП</label>
+        </p>
+
+        <p><b>4. Что из перечисленного категорически запрещено делать при возгорании электропроводки?</b></p>
+        <p>
+            <input type="radio" name="q4" value="a" id="q4a"> <label for="q4a">Тушить пламя водой</label><br>
+            <input type="radio" name="q4" value="b" id="q4b"> <label for="q4b">Использовать порошковый огнетушитель</label><br>
+            <input type="radio" name="q4" value="c" id="q4c"> <label for="q4c">Вызывать пожарную охрану</label><br>
+            <input type="radio" name="q4" value="d" id="q4d"> <label for="q4d">Покидать зону задымления</label>
+        </p>
+
+        <p><b>5. Кто несет ответственность за соблюдение правил охраны труда на конкретном рабочем месте?</b></p>
+        <p>
+            <input type="radio" name="q5" value="a" id="q5a"> <label for="q5a">Только генеральный директор компании</label><br>
+            <input type="radio" name="q5" value="b" id="q5b"> <label for="q5b">Только штатный специалист по охране труда</label><br>
+            <input type="radio" name="q5" value="c" id="q5c"> <label for="q5c">Сам работник и его непосредственный руководитель</label><br>
+            <input type="radio" name="q5" value="d" id="q5d"> <label for="q5d">Инспекция по труду</label>
+        </p>
+
+        <p>
+            <button type="button" onclick="calculateResult()">Проверить ответы</button>
+        </p>
+    </form>
+
+    <hr>
+    <h2 id="quizResult"></h2>
+
+    <script>
+    function calculateResult() {
+        const keys = {
+            q1: 'b',
+            q2: 'b',
+            q3: 'c',
+            q4: 'a',
+            q5: 'c'
+        };
+
+        let userScore = 0;
+        const totalQuestions = 5;
+        const quizForm = document.getElementById('safetyQuiz');
+
+
+        for (let i = 1; i <= totalQuestions; i++) {
+            const questionName = 'q' + i;
+            if (quizForm.elements[questionName].value === keys[questionName]) {
+                userScore++;
+            }
+        }
+
+        document.getElementById('quizResult').innerText = 
+            "Ваш результат: " + userScore + " из " + totalQuestions + " правильных ответов.";
+    }
+    </script>
+
+</body>
+</html>
