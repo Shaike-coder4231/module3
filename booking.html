@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Бронирование | ComfortStay</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    .error-msg { color: #e74c3c; font-size: 13px; display: none; margin-top: 4px; }
+    .error-msg.show { display: block; }
+    input[type="tel"], input[type="date"] { font-family: monospace; }
+  </style>
 </head>
 <body>
   <header>
@@ -23,22 +28,23 @@
         
         <div class="form-group">
           <label>Имя *</label>
-          <input type="text" id="name" name="name" required pattern="^[а-яёА-ЯЁё\s\.\-]+$" placeholder="Иван">
+          <input type="text" id="name" required pattern="^[а-яёА-ЯЁё\s\.\-]+$" placeholder="Иван">
         </div>
         
         <div class="form-group">
           <label>Фамилия *</label>
-          <input type="text" id="surname" name="surname" required pattern="^[а-яёА-ЯЁё\s\.\-]+$" placeholder="Петров">
+          <input type="text" id="surname" required pattern="^[а-яёА-ЯЁё\s\.\-]+$" placeholder="Петров">
         </div>
         
         <div class="form-group">
           <label>Телефон *</label>
-          <input type="tel" id="phone" name="phone" required pattern="^\+7\(\d{3}\)\d{3}-\d{2}-\d{2}$" placeholder="+7(999)123-45-67">
+          <input type="tel" id="phone" required placeholder="+7(999)123-45-67" maxlength="16">
+          <div id="phone-error" class="error-msg">Введите корректный номер (должно быть 11 цифр)</div>
         </div>
         
         <div class="form-group">
           <label>E-mail *</label>
-          <input type="email" id="email" name="email" required placeholder="mail@example.com">
+          <input type="email" id="email" required placeholder="mail@example.com">
         </div>
         
         <div class="form-group">
@@ -48,12 +54,14 @@
         
         <div class="form-group">
           <label>Дата заезда *</label>
-          <input type="date" id="checkin" name="checkin" required>
+          <input type="date" id="checkin" required>
+          <div id="checkin-error" class="error-msg">Дата заезда не может быть в прошлом</div>
         </div>
         
         <div class="form-group">
           <label>Дата выезда *</label>
-          <input type="date" id="checkout" name="checkout" required>
+          <input type="date" id="checkout" required>
+          <div id="checkout-error" class="error-msg">Дата выезда должна быть строго позже даты заезда</div>
         </div>
         
         <button type="submit" class="btn" style="width:100%">Отправить заявку</button>
@@ -71,57 +79,120 @@
   <script src="js/app.js"></script>
   <script>
     const ROOMS = {
-      1:{name:"Стандартный номер",category:"Стандарт"},
-      2:{name:"Эконом номер",category:"Эконом"},
+      1:{name:"Уютный Эконом",category:"Эконом"},
+      2:{name:"Стандарт Плюс",category:"Стандарт"},
       3:{name:"Люкс с видом",category:"Люкс"},
-      4:{name:"Стандарт Плюс",category:"Стандарт"}
+      4:{name:"Семейный Комфорт",category:"Эконом"},
+      5:{name:"Бизнес Стандарт",category:"Стандарт"},
+      6:{name:"Эконом Лайт",category:"Эконом"},
+      7:{name:"Президентский Люкс",category:"Люкс"},
+      8:{name:"Стандарт Уют",category:"Стандарт"}
     };
 
     document.addEventListener('DOMContentLoaded', () => {
-      // Получаем номер из URL
       const params = new URLSearchParams(window.location.search);
       const roomId = params.get('room');
       const room = ROOMS[roomId];
-      
       if (!room) { window.location.href = 'index.html'; return; }
       
-      // Заполняем данные номера
       document.getElementById('room-title').textContent = 'Бронирование: ' + room.name;
       document.getElementById('room-category').value = room.category;
       document.getElementById('room-name-hidden').value = room.name;
       document.getElementById('category-display').value = room.category;
       
-      // Настройка дат
-      App.setupMinDates('checkin', 'checkout');
+      // 📅 1. ВАЛИДАЦИЯ ДАТ
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayStr = today.toISOString().split('T')[0];
+      
+      const checkin = document.getElementById('checkin');
+      const checkout = document.getElementById('checkout');
+      
+      checkin.min = todayStr;
+      
+      checkin.addEventListener('change', function() {
+        const selected = new Date(this.value);
+        selected.setHours(0,0,0,0);
+        if (selected < today) { this.value = todayStr; selected.setTime(today.getTime()); }
+        
+        const minOut = new Date(selected);
+        minOut.setDate(minOut.getDate() + 1);
+        checkout.min = minOut.toISOString().split('T')[0];
+        
+        if (checkout.value && new Date(checkout.value) <= selected) checkout.value = '';
+        document.getElementById('checkin-error').classList.remove('show');
+      });
 
-      // Обработка формы
-      document.getElementById('booking-form').addEventListener('submit', e => {
+      checkout.addEventListener('change', function() {
+        const val = new Date(this.value);
+        val.setHours(0,0,0,0);
+        const cin = new Date(checkin.value);
+        cin.setHours(0,0,0,0);
+        if (val <= cin) this.value = '';
+        document.getElementById('checkout-error').classList.remove('show');
+      });
+
+      // 📞 2. МАСКА ТЕЛЕФОНА
+      const phoneInput = document.getElementById('phone');
+      phoneInput.addEventListener('input', function(e) {
+        let val = e.target.value.replace(/\D/g, '');
+        if (val.length === 0) { e.target.value = ''; return; }
+        if (val[0] === '8') val = '7' + val.slice(1);
+        if (val[0] !== '7') val = '7' + val; // принудительно +7
+        
+        let res = '+7';
+        if (val.length > 1) res += '(' + val.substring(1, 4);
+        if (val.length >= 4) res += ')' + val.substring(4, 7);
+        if (val.length >= 7) res += '-' + val.substring(7, 9);
+        if (val.length >= 9) res += '-' + val.substring(9, 11);
+        e.target.value = res;
+      });
+
+      // ✅ 3. ОТПРАВКА ФОРМЫ С ПРОВЕРКАМИ
+      document.getElementById('booking-form').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        const checkin = document.getElementById('checkin').value;
-        const checkout = document.getElementById('checkout').value;
+        const cin = new Date(checkin.value); cin.setHours(0,0,0,0);
+        const cout = new Date(checkout.value); cout.setHours(0,0,0,0);
         
-        if (new Date(checkout) <= new Date(checkin)) {
-          alert('Дата выезда должна быть строго позже даты заезда');
+        // Сброс ошибок
+        document.querySelectorAll('.error-msg').forEach(el => el.classList.remove('show'));
+        
+        // Проверка заезда
+        if (!checkin.value || cin < today) {
+          document.getElementById('checkin-error').classList.add('show');
+          return;
+        }
+        // Проверка выезда
+        if (!checkout.value || cout <= cin) {
+          document.getElementById('checkout-error').classList.add('show');
+          return;
+        }
+        // Проверка телефона
+        const rawPhone = phoneInput.value.replace(/\D/g, '');
+        if (rawPhone.length !== 11) {
+          document.getElementById('phone-error').classList.add('show');
           return;
         }
 
-        // Создаём бронирование
+        // Сохранение
         App.addBooking({
           name: document.getElementById('name').value.trim(),
           surname: document.getElementById('surname').value.trim(),
-          phone: document.getElementById('phone').value.trim(),
+          phone: phoneInput.value,
           email: document.getElementById('email').value.trim(),
-          category: document.getElementById('room-category').value,
-          roomName: document.getElementById('room-name-hidden').value,
-          checkin, checkout
+          category: room.category,
+          roomName: room.name,
+          checkin: checkin.value,
+          checkout: checkout.value
         });
 
-        // Показываем успех
         document.getElementById('booking-success').style.display = 'block';
         setTimeout(() => {
           document.getElementById('booking-success').style.display = 'none';
-          document.getElementById('booking-form').reset();
+          this.reset();
+          checkout.min = ''; checkout.value = '';
+          checkin.value = '';
         }, 3000);
       });
     });
